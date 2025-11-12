@@ -35,5 +35,6 @@ tasks.named('test') {
 }
 
 tasks.named('bootJar') {
-	mainClass.set('com.example.backend.BackendApplication') 
+    mainClass.set('com.example.backend.DemoApplication')
 }
+
