@@ -1,6 +1,7 @@
 package com.example.backend.model;
 
 import jakarta.persistence.*;
+import java.util.Date;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +25,13 @@ public class User implements UserDetails {
 
     @Column(unique = true, nullable = false)
     private String email;
+    
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+    
+    @Column(name = "reset_password_expires")
+    private Date resetPasswordExpires;
+
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -82,6 +90,22 @@ public class User implements UserDetails {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+    
+    public String getResetPasswordToken() {
+        return resetPasswordToken;
+    }
+
+    public void setResetPasswordToken(String resetPasswordToken) {
+        this.resetPasswordToken = resetPasswordToken;
+    }
+
+    public Date getResetPasswordExpires() {
+        return resetPasswordExpires;
+    }
+
+    public void setResetPasswordExpires(Date resetPasswordExpires) {
+        this.resetPasswordExpires = resetPasswordExpires;
     }
 
     // UserDetails implementation
