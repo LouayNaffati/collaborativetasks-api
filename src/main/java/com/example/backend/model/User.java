@@ -25,6 +25,8 @@ public class User implements UserDetails {
 
     @Column(unique = true, nullable = false)
     private String email;
+
+    private String profileImage;
     
     @Column(name = "reset_password_token")
     private String resetPasswordToken;
@@ -90,6 +92,14 @@ public class User implements UserDetails {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
     }
     
     public String getResetPasswordToken() {
