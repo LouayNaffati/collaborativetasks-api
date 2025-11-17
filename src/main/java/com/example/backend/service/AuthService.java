@@ -57,11 +57,11 @@ public class AuthService {
     // ===================== REGISTER =====================
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            return new AuthResponse(null, null, "Username already exists");
+            return new AuthResponse(null, null, null, "Username already exists");
         }
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            return new AuthResponse(null, null, "Email already exists");
+            return new AuthResponse(null, null, null, "Email already exists");
         }
 
         User user = new User();
