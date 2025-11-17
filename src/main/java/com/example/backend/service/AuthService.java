@@ -36,7 +36,6 @@ public class AuthService {
     private AuthenticationManager authenticationManager;
 
 
-    // ===================== GET USERS BY ROLE =====================
     public List<UserDto> getUsersByRole(User.Role role) {
         List<User> users = userRepository.findByRole(role);
         return users.stream()
@@ -54,7 +53,6 @@ public class AuthService {
     }
 
 
-    // ===================== REGISTER =====================
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             return new AuthResponse(null, null, "Username already exists");
@@ -77,7 +75,6 @@ public class AuthService {
     }
 
 
-    // ===================== LOGIN =====================
     public AuthResponse login(LoginRequest request) {
         try {
             authenticationManager.authenticate(
@@ -96,25 +93,21 @@ public class AuthService {
     }
 
 
-    // ===================== FORGOT PASSWORD =====================
     public String forgotPassword(String email) {
         Optional<User> userOptional = userRepository.findByEmail(email);
 
-        // Always return a generic message (security best practice)
         if (userOptional.isEmpty()) {
             return "If the email exists, a reset link has been sent";
         }
 
         User user = userOptional.get();
 
-        // Generate reset token
         String resetToken = UUID.randomUUID().toString();
         user.setResetPasswordToken(resetToken);
         user.setResetPasswordExpires(new Date(System.currentTimeMillis() + 3600000)); // 1h
 
         userRepository.save(user);
 
-        // TODO: replace with real email sending service
         System.out.println("Reset token for " + email + ": " + resetToken);
         System.out.println("Reset URL: http://your-frontend-url/reset-password?token=" + resetToken);
 
@@ -122,7 +115,6 @@ public class AuthService {
     }
 
 
-    // ===================== RESET PASSWORD =====================
     public String resetPassword(String token, String newPassword) {
         Optional<User> userOptional = userRepository.findByResetPasswordToken(token);
 
@@ -132,7 +124,6 @@ public class AuthService {
 
         User user = userOptional.get();
 
-        // Token expired
         if (user.getResetPasswordExpires().before(new Date())) {
             return "Reset token has expired";
         }

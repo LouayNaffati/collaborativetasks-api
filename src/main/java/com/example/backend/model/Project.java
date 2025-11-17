@@ -39,7 +39,7 @@ public class Project {
 		this.description = description;
 	}
 
-	// Getters and setters
+	
 	public Long getId() {
 		return id;
 	}

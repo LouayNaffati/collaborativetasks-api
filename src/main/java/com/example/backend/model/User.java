@@ -42,7 +42,7 @@ public class User implements UserDetails {
         USER, ADMIN
     }
 
-    // Constructors
+    
     public User() {
     }
 
@@ -53,7 +53,6 @@ public class User implements UserDetails {
         this.role = role;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -118,7 +117,6 @@ public class User implements UserDetails {
         this.resetPasswordExpires = resetPasswordExpires;
     }
 
-    // UserDetails implementation
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

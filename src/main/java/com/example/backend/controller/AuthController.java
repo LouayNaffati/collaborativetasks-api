@@ -24,21 +24,19 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    // ===================== GET USERS BY ROLE =====================
+    
     @GetMapping("/users/by-role")
     public ResponseEntity<List<UserDto>> getUsersByRole(@RequestParam User.Role role) {
         List<UserDto> users = authService.getUsersByRole(role);
         return ResponseEntity.ok(users);
     }
 
-    // ===================== FORGOT PASSWORD =====================
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         String response = authService.forgotPassword(request.getEmail());
         return ResponseEntity.ok(response);
     }
 
-    // ===================== RESET PASSWORD =====================
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
         String response = authService.resetPassword(request.getToken(), request.getNewPassword());
@@ -49,7 +47,6 @@ public class AuthController {
         return ResponseEntity.badRequest().body(response);
     }
 
-    // ===================== REGISTER =====================
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         AuthResponse response = authService.register(request);
@@ -60,7 +57,6 @@ public class AuthController {
         return ResponseEntity.badRequest().body(response);
     }
 
-    // ===================== LOGIN =====================
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
