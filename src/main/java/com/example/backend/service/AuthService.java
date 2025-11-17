@@ -55,11 +55,11 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            return new AuthResponse(null, null, "Username already exists");
+            return new AuthResponse(null, null, null, "Username already exists");
         }
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            return new AuthResponse(null, null, "Email already exists");
+            return new AuthResponse(null, null, null, "Email already exists");
         }
 
         User user = new User();
@@ -71,7 +71,7 @@ public class AuthService {
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(user.getUsername());
-        return new AuthResponse(token, user.getUsername(), "User registered successfully");
+        return new AuthResponse(token, user.getUsername(), user.getRole().name(), "User registered successfully");
     }
 
 
@@ -84,11 +84,12 @@ public class AuthService {
                     )
             );
 
+            User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
             String token = jwtUtil.generateToken(request.getUsername());
-            return new AuthResponse(token, request.getUsername(), "Login successful");
+            return new AuthResponse(token, request.getUsername(), user.getRole().name(), "Login successful");
 
         } catch (Exception e) {
-            return new AuthResponse(null, null, "Invalid username or password");
+            return new AuthResponse(null, null, null, "Invalid username or password");
         }
     }
 
