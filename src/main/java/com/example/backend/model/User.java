@@ -39,7 +39,7 @@ public class User implements UserDetails {
     private Role role;
 
     public enum Role {
-        USER, ADMIN
+        USER, MANAGER, ADMIN
     }
 
     

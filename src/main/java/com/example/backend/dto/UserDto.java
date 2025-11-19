@@ -15,6 +15,7 @@ public class UserDto {
 	        this.username = username;
 	        this.email = email;
 	        this.role = role;
+			
 	    }
 
 	    
