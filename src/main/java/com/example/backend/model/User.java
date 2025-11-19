@@ -34,6 +34,10 @@ public class User implements UserDetails {
     @Column(name = "reset_password_expires")
     private Date resetPasswordExpires;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
+
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -51,6 +55,11 @@ public class User implements UserDetails {
         this.password = password;
         this.email = email;
         this.role = role;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = new Date();
     }
 
     public Long getId() {
@@ -115,6 +124,14 @@ public class User implements UserDetails {
 
     public void setResetPasswordExpires(Date resetPasswordExpires) {
         this.resetPasswordExpires = resetPasswordExpires;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     @Override
