@@ -19,7 +19,11 @@ public class UserController {
     @PutMapping("/update")
     public ResponseEntity<?> updateUser(@RequestBody UpdateUserDto dto, Authentication authentication) {
         String currentUsername = authentication.getName();
-        User user = userRepository.findByUsername(currentUsername).get();
+        User user = userRepository.findByUsername(currentUsername).orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.status(401).body("User not found or not authenticated");
+        }
 
         if (dto.getUsername() != null && !dto.getUsername().equals(user.getUsername())) {
             if (userRepository.existsByUsername(dto.getUsername())) {
@@ -39,8 +43,17 @@ public class UserController {
             user.setProfileImage(dto.getProfileImage());
         }
 
-        userRepository.save(user);
-        return ResponseEntity.ok("User updated successfully");
+        User saved = userRepository.save(user);
+
+        com.example.backend.dto.UserDto response = new com.example.backend.dto.UserDto(
+                saved.getId(),
+                saved.getUsername(),
+                saved.getEmail(),
+                saved.getRole() != null ? saved.getRole().name() : null,
+                saved.getCreatedAt() != null ? saved.getCreatedAt().toString() : null
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/profile")
