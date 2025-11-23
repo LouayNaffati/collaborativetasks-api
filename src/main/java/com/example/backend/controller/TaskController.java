@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.TaskRequest;
 import com.example.backend.dto.TaskResponse;
+import com.example.backend.dto.ErrorResponse;
 import com.example.backend.model.Task;
 import com.example.backend.service.TaskService;
 import org.springframework.beans.BeanUtils;
@@ -10,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -24,29 +25,43 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    public ResponseEntity<?> getAllTasks() {
+        try {
+            return ResponseEntity.ok(taskService.getAllTasks());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ErrorResponse(500, "Internal Server Error", e.getMessage()));
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
-        return taskService.getTaskById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> getTaskById(@PathVariable Long id) {
+        try {
+            java.util.Optional<Task> opt = taskService.getTaskById(id);
+            if (opt.isPresent()) {
+                return ResponseEntity.ok(opt.get());
+            }
+            return ResponseEntity.status(404).body(new ErrorResponse(404, "Not Found", "Task not found with id: " + id));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(new ErrorResponse(400, "Bad Request", e.getMessage()));
+        }
     }
 
     @PostMapping
-    public TaskResponse createTask(@RequestBody TaskRequest taskRequest) {
-        Task task = new Task();
-        BeanUtils.copyProperties(taskRequest, task);
-        Task savedTask = taskService.createTask(task);
-        TaskResponse taskResponse = new TaskResponse();
-        BeanUtils.copyProperties(savedTask, taskResponse);
-        return taskResponse;
+    public ResponseEntity<?> createTask(@RequestBody TaskRequest taskRequest) {
+        try {
+            Task task = new Task();
+            BeanUtils.copyProperties(taskRequest, task);
+            Task savedTask = taskService.createTask(task);
+            TaskResponse taskResponse = new TaskResponse();
+            BeanUtils.copyProperties(savedTask, taskResponse);
+            return ResponseEntity.ok(taskResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(new ErrorResponse(400, "Bad Request", e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TaskResponse> updateTask(@PathVariable Long id, @RequestBody TaskRequest taskRequest) {
+    public ResponseEntity<?> updateTask(@PathVariable Long id, @RequestBody TaskRequest taskRequest) {
         try {
             Task updatedTask = taskService.updateTask(id, new Task());
             BeanUtils.copyProperties(taskRequest, updatedTask);
@@ -54,29 +69,47 @@ public class TaskController {
             BeanUtils.copyProperties(updatedTask, taskResponse);
             return ResponseEntity.ok(taskResponse);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body(new ErrorResponse(404, "Not Found", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(new ErrorResponse(400, "Bad Request", e.getMessage()));
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
-        taskService.deleteTask(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> deleteTask(@PathVariable Long id) {
+        try {
+            taskService.deleteTask(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(new ErrorResponse(404, "Not Found", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(new ErrorResponse(400, "Bad Request", e.getMessage()));
+        }
     }
 
     @GetMapping("/user")
-    public List<Task> getUserTasks(Authentication authentication) {
-        Long userId = Long.valueOf(authentication.getName());
-        return taskService.getTasksByUserId(userId);
+    public ResponseEntity<?> getUserTasks(Authentication authentication) {
+        try {
+            Long userId = Long.valueOf(authentication.getName());
+            return ResponseEntity.ok(taskService.getTasksByUserId(userId));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.status(400).body(new ErrorResponse(400, "Bad Request", "Invalid user id in token: " + authentication.getName()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ErrorResponse(500, "Internal Server Error", e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}/finish")
-    public ResponseEntity<Task> markTaskAsFinished(@PathVariable Long id, Authentication authentication) {
-        Long userId = Long.valueOf(authentication.getName());
+    public ResponseEntity<?> markTaskAsFinished(@PathVariable Long id, Authentication authentication) {
         try {
+            Long userId = Long.valueOf(authentication.getName());
             return ResponseEntity.ok(taskService.markTaskAsFinished(id, userId));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.status(400).body(new ErrorResponse(400, "Bad Request", "Invalid user id in token: " + authentication.getName()));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(403).build();
+            return ResponseEntity.status(403).body(new ErrorResponse(403, "Forbidden", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ErrorResponse(500, "Internal Server Error", e.getMessage()));
         }
     }
 }

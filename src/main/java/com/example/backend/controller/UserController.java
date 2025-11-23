@@ -2,6 +2,8 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.UpdateUserDto;
 import com.example.backend.model.User;
+import com.example.backend.util.JwtUtil;
+import com.example.backend.dto.AuthResponse;
 import com.example.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,9 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PutMapping("/update")
     public ResponseEntity<?> updateUser(@RequestBody UpdateUserDto dto, Authentication authentication) {
         String currentUsername = authentication.getName();
@@ -25,11 +30,15 @@ public class UserController {
             return ResponseEntity.status(401).body("User not found or not authenticated");
         }
 
-        if (dto.getUsername() != null && !dto.getUsername().equals(user.getUsername())) {
+        String oldUsername = user.getUsername();
+        boolean usernameChanged = false;
+
+        if (dto.getUsername() != null && !dto.getUsername().equals(oldUsername)) {
             if (userRepository.existsByUsername(dto.getUsername())) {
                 return ResponseEntity.badRequest().body("Username already exists");
             }
             user.setUsername(dto.getUsername());
+            usernameChanged = true;
         }
 
         if (dto.getEmail() != null && !dto.getEmail().equals(user.getEmail())) {
@@ -43,17 +52,24 @@ public class UserController {
             user.setProfileImage(dto.getProfileImage());
         }
 
-        User saved = userRepository.save(user);
+    User saved = userRepository.save(user);
 
-        com.example.backend.dto.UserDto response = new com.example.backend.dto.UserDto(
-                saved.getId(),
-                saved.getUsername(),
-                saved.getEmail(),
-                saved.getRole() != null ? saved.getRole().name() : null,
-                saved.getCreatedAt() != null ? saved.getCreatedAt().toString() : null
-        );
+    // If username changed, generate a new JWT and return it along with user info so client can replace token
+    if (usernameChanged) {
+        String token = jwtUtil.generateToken(saved.getUsername());
+        AuthResponse authResponse = new AuthResponse(token, saved.getUsername(), saved.getRole() != null ? saved.getRole().name() : null, "Username changed. Use the returned token for subsequent requests.");
+        return ResponseEntity.ok(authResponse);
+    }
 
-        return ResponseEntity.ok(response);
+    com.example.backend.dto.UserDto response = new com.example.backend.dto.UserDto(
+        saved.getId(),
+        saved.getUsername(),
+        saved.getEmail(),
+        saved.getRole() != null ? saved.getRole().name() : null,
+        saved.getCreatedAt() != null ? saved.getCreatedAt().toString() : null
+    );
+
+    return ResponseEntity.ok(response);
     }
 
     @GetMapping("/profile")
