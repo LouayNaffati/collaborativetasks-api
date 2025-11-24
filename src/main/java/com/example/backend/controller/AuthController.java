@@ -26,9 +26,33 @@ public class AuthController {
 
     
     @GetMapping("/users/by-role")
-    public ResponseEntity<List<UserDto>> getUsersByRole(@RequestParam User.Role role) {
-        List<UserDto> users = authService.getUsersByRole(role);
-        return ResponseEntity.ok(users);
+    public ResponseEntity<?> getUsersByRole(@RequestParam(required = false) User.Role role) {
+        try {
+            // Check if the role parameter is missing or invalid
+            if (role == null) {
+                return ResponseEntity.badRequest().body("Error: Role parameter is missing or invalid. Please provide a valid role.");
+            }
+
+            // Fetch users by role
+            List<UserDto> users = authService.getUsersByRole(role);
+
+            // Check if no users are found for the given role
+            if (users.isEmpty()) {
+                return ResponseEntity.status(404).body("Error: No users found for the specified role: " + role);
+            }
+
+            // Return the list of users if everything is fine
+            return ResponseEntity.ok(users);
+        } catch (IllegalArgumentException e) {
+            // Handle specific illegal argument exceptions
+            return ResponseEntity.badRequest().body("Error: Invalid role provided. Details: " + e.getMessage());
+        } catch (NullPointerException e) {
+            // Handle null pointer exceptions
+            return ResponseEntity.status(500).body("Error: A required value was null. Details: " + e.getMessage());
+        } catch (Exception e) {
+            // Handle any other unexpected exceptions
+            return ResponseEntity.status(500).body("Error: An unexpected error occurred. Details: " + e.getMessage());
+        }
     }
 
     @PostMapping("/forgot-password")
