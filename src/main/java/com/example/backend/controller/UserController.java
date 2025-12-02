@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/user")
@@ -81,5 +82,22 @@ public class UserController {
         dto.setEmail(user.getEmail());
         dto.setProfileImage(user.getProfileImage());
         return ResponseEntity.ok(dto);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteProfile(Authentication authentication) {
+        String currentUsername = authentication.getName();
+        User user = userRepository.findByUsername(currentUsername).orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found or not authenticated");
+        }
+
+        try {
+            userRepository.delete(user);
+            return ResponseEntity.ok("Profile deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete profile: " + e.getMessage());
+        }
     }
 }

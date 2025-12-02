@@ -25,4 +25,11 @@ public class UserService {
     public long countByRole(User.Role role) {
         return userRepository.countByRole(role);
     }
+    
+
+    public void deleteUserById(Long id) {
+        // Implementation to delete user by ID
+    }
+
 }
+
