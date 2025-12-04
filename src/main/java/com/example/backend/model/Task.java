@@ -22,6 +22,11 @@ public class Task {
 
     private Long userId;
 
+    //relashonships
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -80,5 +85,14 @@ public class Task {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    // relashonship
+     public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 }

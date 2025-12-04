@@ -10,6 +10,8 @@ public class TaskResponse {
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long projectId;       // Add this
+    private String projectName;
 
   
     public Long getId() {
@@ -58,5 +60,22 @@ public class TaskResponse {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    //relashonship
+     public Long getProjectId() {
+        return projectId;
+    }
+    
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+    
+    public String getProjectName() {
+        return projectName;
+    }
+    
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 }
